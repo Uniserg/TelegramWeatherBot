@@ -221,6 +221,7 @@ public class Bot extends TelegramLongPollingBot {
                     break;
                 case ("текущая погода"):
                     setForecast(message, this::getWeatherCurrent);
+                    break;
                 case ("получать рассылку"):
                     if (subscribes.containsKey(chatId)) {
                         broadcast.add(chatId);
