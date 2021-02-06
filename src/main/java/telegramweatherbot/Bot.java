@@ -240,9 +240,10 @@ public class Bot extends TelegramLongPollingBot {
                     break;
                 case ("погода на ближайшие 3 дня"):
                     setForecast(message, this::getWeather3Days);
+                    break;
                 case ("погода на неделю"):
                     setForecast(message, this::getWeatherWeek);
-                
+                    break;
                 default:
                     String weather;
                     if (getForecast == null) {
