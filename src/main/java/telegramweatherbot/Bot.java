@@ -1,12 +1,14 @@
 package telegramweatherbot;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -31,11 +33,9 @@ public class Bot extends TelegramLongPollingBot {
     private static final String API_KEY = "1946b0c3abfe50a3352de413456b55fd";
     HashMap<String, String> subscribes;
     HashSet<String> broadcast;
-    Calendar c1;
-    Calendar c2;
-    Timer timer;
     boolean isChangeSettings = false;
     Function<String, String> getForecast;
+    ScheduledExecutorService scheduledExecutorService;
 
     public static void main(String[] args) {
         ApiContextInitializer.init();
@@ -45,30 +45,10 @@ public class Bot extends TelegramLongPollingBot {
             Bot bot = new Bot();
             bot.initBot();
             telegramBotsApi.registerBot(bot);
-            bot.sendOn20();
-            bot.sendOn9();
 
         } catch (TelegramApiRequestException ignored) {
         }
 
-    }
-
-    public void sendOn9() {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                broadcast();
-            }
-        }, c1.getTime(), 86400000);
-    }
-
-    public void sendOn20() {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                broadcast();
-            }
-        }, c2.getTime(), 86400000);
     }
 
     public void initBot() {
@@ -88,19 +68,10 @@ public class Bot extends TelegramLongPollingBot {
         };
         subscribes = new HashMap<>();
         broadcast = new HashSet<>();
-
-        //ВЫНЕСТИ В ОТДЕЛЬНЫЙ ПОТОК
-        c1 = Calendar.getInstance();
-        c2 = Calendar.getInstance();
-        timer = new Timer();
-
-        c1.set(Calendar.HOUR_OF_DAY, 9);
-        c1.set(Calendar.MINUTE, 0);
-        c1.set(Calendar.SECOND, 0);
-
-        c2.set(Calendar.HOUR_OF_DAY, 20);
-        c2.set(Calendar.MINUTE, 0);
-        c1.set(Calendar.SECOND, 0);
+        scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        long initDelay = LocalDateTime.now()
+                .until(LocalDateTime.of(2021, 2, 8,9,0,0), ChronoUnit.MILLIS);
+        scheduledExecutorService.scheduleAtFixedRate(this::broadcast, initDelay, 43200000, TimeUnit.MILLISECONDS);
     }
 
     public String getWeatherWeek(String city) {
@@ -225,7 +196,7 @@ public class Bot extends TelegramLongPollingBot {
                 case ("получать рассылку"):
                     if (subscribes.containsKey(chatId)) {
                         broadcast.add(chatId);
-                        sendMsg(message, "Отлично! Теперь Вам будет приходить уведомление о текущей погоде в 9:00 и в 20:00 по МСК каждый день.");
+                        sendMsg(message, "Отлично! Теперь Вам будет приходить уведомление о текущей погоде в 9:00 и в 21:00 по МСК каждый день.");
                     } else {
                         sendMsg(message, "Чтобы получать рассылку, нужно сначала подписаться.");
                     }
