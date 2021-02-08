@@ -70,7 +70,7 @@ public class Bot extends TelegramLongPollingBot {
         broadcast = new HashSet<>();
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         long initDelay = LocalDateTime.now()
-                .until(LocalDateTime.of(2021, 2, 8,9,0,0), ChronoUnit.MILLIS);
+                .until(LocalDateTime.of(2021, 2, 9,9,0,0), ChronoUnit.MILLIS);
         scheduledExecutorService.scheduleAtFixedRate(this::broadcast, initDelay, 43200000, TimeUnit.MILLISECONDS);
     }
 
