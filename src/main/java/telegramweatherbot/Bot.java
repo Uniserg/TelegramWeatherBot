@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -35,7 +32,7 @@ public class Bot extends TelegramLongPollingBot {
     HashSet<String> broadcast;
     boolean isChangeSettings = false;
     Function<String, String> getForecast;
-    ScheduledExecutorService scheduledExecutorService;
+    ScheduleExecutor scheduleExecutor;
 
     public static void main(String[] args) {
         ApiContextInitializer.init();
@@ -68,10 +65,10 @@ public class Bot extends TelegramLongPollingBot {
         };
         subscribes = new HashMap<>();
         broadcast = new HashSet<>();
-        scheduledExecutorService = Executors.newScheduledThreadPool(1);
         long initDelay = LocalDateTime.now()
-                .until(LocalDateTime.of(2021, 2, 9,9,0,0), ChronoUnit.MILLIS);
-        scheduledExecutorService.scheduleAtFixedRate(this::broadcast, initDelay, 43200000, TimeUnit.MILLISECONDS);
+                .until(LocalDateTime.of(2021, 2, 10,21,0,0), ChronoUnit.MILLIS);
+        scheduleExecutor = new ScheduleExecutor(this::broadcast, "schedule", initDelay, 43200000);
+        scheduleExecutor.start();
     }
 
     public String getWeatherWeek(String city) {
